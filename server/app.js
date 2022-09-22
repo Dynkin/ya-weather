@@ -1,10 +1,17 @@
 const express = require("express");
 const https = require('https');
+const path = require('path');
 require('dotenv').config();
     
 const app = express();
-  
-app.use(express.static(__dirname + "/public"));
+
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, '../build')));
+
+  app.get('/', function (req, res) {
+    res.sendFile(path.join(__dirname, '../build', 'index.html'));
+  });
+}
   
 app.get("/api/weather", function(req, res){
   const options = {
@@ -44,6 +51,8 @@ app.get("/api/weather", function(req, res){
   yandexReq.end();
 });
    
-app.listen(3001, function(){
+const PORT = process.env.NODE_ENV === 'production' ? 3000 : 3001;
+app.listen(PORT, function(){
+    console.log(`NODE_ENV = ${process.env.NODE_ENV}`);
     console.log("Сервер ожидает подключения...");
 });
